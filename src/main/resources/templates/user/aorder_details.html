@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" id="viewport"
+          content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no"/>
+    <link href="/css/reset.css" rel="stylesheet" type="text/css">
+    <link href="/css/indent-details.css" rel="stylesheet" type="text/css">
+    <link href="/css/shoping-cart.css" rel="stylesheet" type="text/css">
+
+</head>
+<body>
+<div class="near-box" id="app" v-cloak>
+    <a href="/view/myinfo" class="jd-qrdd-topbox">订单详情</a>
+
+<!--//购物车购买商品展示-->
+    <div class="jd-qrdd-bigbox" v-if="payInfo.food.length>0">
+        <div style="background: #fff;font-size: 12px;border-bottom: 1px solid #e9e9e9;padding: 5px;color: #757575">
+            订单有效期时间为15分钟
+        </div>
+        <div class="jd-qrdd-a1">
+            <div>
+                <span class="qrdd-a1-t1">{{payInfo.address.name}}</span>
+                <span class="qrdd-a1-t1">{{payInfo.address.phone}}</span>
+                <span v-if="payInfo.address.isDefault==1" class="qrdd-a1-t2">默认</span>
+            </div>
+            <div>
+                <div class="qrdd-a1-b1">
+                    <span class="qrdd-a1-img1"></span>
+                    <span class="qrdd-a1-t3">{{payInfo.address.addr}}{{payInfo.address.addDetails}}</span>
+                </div>
+            </div>
+        </div>
+        <!--商品部分-->
+        <div class="zjzz-buylist-goods1" >
+            <div id="my1" class="zjzz-buylist-det" v-for="(food,index) in payInfo.food" :key="index">
+                <a :href="`/view/food_details?id=`+food.id+`&sId=`+food.sid">
+                    <img :src="food.image"/>
+                    <div class="zjzz-buylist-gdetail">
+                        <span class="zjzz-buylist-gtit1">{{food.title}}</span>
+                        <span class="zjzz-buylist-gmoney">
+                            <i class="zjzz-buylist-gm1">￥{{food.price}}</i>
+                            <i class="zjzz-buylist-gm2">x{{food.num}}</i>
+                    </span>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <!--商品金额部分-->
+        <div class="indent-details-box2">
+            <span class="indent-details-text4">应付金额</span>
+            <span class="indent-details-text5">￥{{totalMoney}}</span>
+        </div>
+        <a href="javascript:void(0)" @click="payOrder1(payInfo.food[0].aid)">
+            <div class="indent-details-box2"
+                 style="width:100%;margin-top:10px;text-align:center;padding: 5px;background: #ff9201;color: white">
+                确认支付
+            </div>
+        </a>
+    </div>
+<!--    单独买商品展示-->
+    <div class="jd-qrdd-bigbox" v-if="payInfo.food.title">
+        <div style="background: #fff;font-size: 12px;border-bottom: 1px solid #e9e9e9;padding: 5px;color: #757575">
+            订单有效期时间为15分钟
+        </div>
+        <div class="jd-qrdd-a1">
+            <div>
+                <span class="qrdd-a1-t1">{{payInfo.address.name}}</span>
+                <span class="qrdd-a1-t1">{{payInfo.address.phone}}</span>
+                <span v-if="payInfo.address.isDefault==1" class="qrdd-a1-t2">默认</span>
+            </div>
+            <div>
+                <div class="qrdd-a1-b1">
+                    <span class="qrdd-a1-img1"></span>
+                    <span class="qrdd-a1-t3">{{payInfo.address.addr}}{{payInfo.address.addDetails}}</span>
+                </div>
+            </div>
+        </div>
+    <div class="zjzz-buylist-goods1" >
+        <div id="my2" class="zjzz-buylist-det">
+            <a :href="``">
+                <img :src="payInfo.food.image"/>
+                <div class="zjzz-buylist-gdetail">
+                    <span class="zjzz-buylist-gtit1">{{payInfo.food.title}}</span>
+                    <span class="zjzz-buylist-gmoney">
+                            <i class="zjzz-buylist-gm1">￥{{payInfo.food.title}}</i>
+                            <i class="zjzz-buylist-gm2">x{{payInfo.food.num}}</i>
+                    </span>
+                </div>
+            </a>
+        </div>
+    </div>
+        <!--商品金额部分-->
+        <div class="indent-details-box2">
+            <span class="indent-details-text4">应付金额</span>
+            <span class="indent-details-text5">￥{{totalMoney}}</span>
+        </div>
+        <a href="javascript:void(0)" @click=" payOrder2(payInfo.food.aid)">
+            <div class="indent-details-box2"
+                 style="width:100%;margin-top:10px;text-align:center;padding: 5px;background: #ff9201;color: white">
+                确认支付
+            </div>
+        </a>
+    </div>
+</div>
+</body>
+<script src="/js/jquery-1.8.3.min.js" type="text/javascript"></script>
+<script src="/js/cart.js" type="text/javascript"></script>
+<script type="text/javascript" src="/js/vue.min.js"></script>
+<script type="text/javascript" src="/js/axios.min.js"></script>
+<script type="text/javascript" src="/js/sessionStorage.js"></script>
+<script>
+    new Vue({
+        el: "#app",
+        data: {
+            payInfo: {
+                "address": {
+                    "id": 0,
+                    "uid": 0,
+                    "name": "",
+                    "phone": "",
+                    "addr": "",
+                    "addDetails": "",
+                    "isDefault": 0
+
+                },
+                "food": [
+                    {
+                        "id": 0,
+                        "sid": "",
+                        "title": "",
+                        "price": 0,
+                        "priceOff": 0,
+                        "image": "",
+                        "describes": "",
+                        "num": 1,
+                        "aid": 0
+                    }
+                ],
+            },
+            "totalMoney": 0
+        },
+        methods: {
+            //获取订单
+            init() {
+                let key = localStorage.getItem(redisKey);
+                let aid = localStorage.getItem(aidKey);
+                axios.get(`/orders/aorderdetaile?key=${key}&aid=${aid}`).then(response => {
+                    console.log(response);
+                    this.payInfo = response.data
+                    this.computerMoney();
+                }).catch(err => {
+                    console.log(err);
+
+                    this.message = err.response.data.message;
+                })
+
+
+            },
+            computerMoney() {
+                let index = this.payInfo.food.length;
+                let totalMoney = this.totalMoney;
+
+                if (index > 0) {
+                    for (let i = 0; i < index; i++) {
+                        let cartItem = this.payInfo.food[i];
+                        let money = accMul(cartItem.price, cartItem.num);
+                        totalMoney = accAdd(totalMoney, money)
+                    }
+                }else {
+                    let money = accMul(this.payInfo.food.price, this.payInfo.food.num);
+                    totalMoney = accAdd(totalMoney, money)
+                }
+                this.totalMoney = totalMoney;
+            },
+            // 多个支付
+            payOrder1(aid){
+                let key = localStorage.getItem(redisKey);
+                console.log(key)
+                console.log("***"+aid)
+                axios.get(`/orders/multipleorder?aId=${aid}&key=${key}`).then(response=>{
+                    console.log(response.data)
+                    if (response.data){
+                        alert("支付成功")
+                        location.href= "/user/checkwaitdeliver";
+                    }
+                }).catch(err=>{
+                    console.log(err);
+                })
+            },
+            // 单个支付
+            payOrder2(aid){
+                let key = localStorage.getItem(redisKey);
+                console.log(key)
+                console.log("***"+aid)
+                axios.get(`/orders/singleOrder?aId=${aid}&key=${key}`).then(response=>{
+                    console.log(response.data)
+                    if (response.data){
+                        alert("支付成功")
+                        location.href= "/user/checkwaitdeliver";
+                    }
+                }).catch(err=>{
+                    console.log(err);
+                })
+            },
+        },
+        created() {
+            this.init();
+        }
+    });
+</script>
+<script>
+    //乘法
+    function accMul(arg1, arg2) {
+        let m = 0, s1 = arg1.toString(), s2 = arg2.toString();
+        try {
+            m += s1.split(".")[1].length
+        } catch (e) {
+        }
+        try {
+            m += s2.split(".")[1].length
+        } catch (e) {
+        }
+        return Number(s1.replace(".", "")) * Number(s2.replace(".", "")) / Math.pow(10, m)
+    }
+
+    //除法
+    function accDiv(arg1, arg2) {
+        let t1 = 0, t2 = 0, r1, r2;
+        try {
+            t1 = arg1.toString().split(".")[1].length
+        } catch (e) {
+        }
+        try {
+            t2 = arg2.toString().split(".")[1].length
+        } catch (e) {
+        }
+        with (Math) {
+            r1 = Number(arg1.toString().replace(".", ""))
+            r2 = Number(arg2.toString().replace(".", ""))
+            return accMul((r1 / r2), pow(10, t2 - t1));
+        }
+    }
+
+    //加法
+    function accAdd(arg1, arg2) {
+        let r1, r2, m;
+        try {
+            r1 = arg1.toString().split(".")[1].length
+        } catch (e) {
+            r1 = 0
+        }
+        try {
+            r2 = arg2.toString().split(".")[1].length
+        } catch (e) {
+            r2 = 0
+        }
+        m = Math.pow(10, Math.max(r1, r2))
+        return (arg1 * m + arg2 * m) / m
+    }
+
+    //减法
+    function Subtr(arg1, arg2) {
+        let r1, r2, m, n;
+        try {
+            r1 = arg1.toString().split(".")[1].length
+        } catch (e) {
+            r1 = 0
+        }
+        try {
+            r2 = arg2.toString().split(".")[1].length
+        } catch (e) {
+            r2 = 0
+        }
+        m = Math.pow(10, Math.max(r1, r2));
+        n = (r1 >= r2) ? r1 : r2;
+        return ((arg1 * m - arg2 * m) / m).toFixed(n);
+    }
+</script>
+</html>

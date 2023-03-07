@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" id="viewport"
+          content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no"/>
+    <link href="/css/reset.css" rel="stylesheet" type="text/css"/>
+    <link href="/css/food-details.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<div class="near-box" id="app">
+    <div class="gdetails-header">
+        <a href="javascript:history.go(-1)" class="gdetails-hleft"></a>
+        <div class="gdetails-htbox">
+            商品详情
+        </div>
+    </div>
+    <div class="gdetails-bigbox">
+        <!--轮播部分-->
+        <div id="slideBox" class="slideBox">
+            <div class="bd">
+                <ul>
+                    <li><img :src="foodDetails.food.image"/></a></li>
+                </ul>
+            </div>
+            <div class="hd">
+                <ul></ul>
+            </div>
+        </div>
+        <!--轮播部分-->
+        <!--商品价格部分-->
+        <div class="gdetails-price" v-cloak>
+            <div class="gdetails-price-box1">
+                <span class="gdetails-price-text1">￥{{foodDetails.food.price}}</span>
+                <span class="gdetails-price-text2">原价￥{{foodDetails.food.priceOff}}</span>
+                <span class="gdetails-price-text3">特价</span>
+            </div>
+            <div class="gdetails-price-box1">
+                <div class="gdetails-price-text5">{{foodDetails.food.title}}</div>
+            </div>
+        </div>
+        <!--商品价格部分-->
+
+        <!--图文详情部分-->
+        <div class="recommend-box1">商品详情</div>
+        <div class="recommend-box2" v-cloak>
+            <span class="recommend-box2-text1"><i>商品描述： </i>{{foodDetails.food.describes}}</span>
+
+        </div>
+        <div class="recommend-box1">图文详情</div>
+        <div class="image-text-xq-img" v-cloak>
+            <img :src="foodDetails.food.image">
+        </div>
+        <div class="recommend-box1">评论信息</div>
+        <!--		<div class="recommend-box2" v-cloak v-if="fruitsDetail.reviews.length>0 && fruitsDetail.reviews[0].rid>0">-->
+        <div class="recommend-box2">
+            <img src="/images/pj.png" width="30px" height="30px" style="vertical-align: middle">
+            <span>
+				共{{foodDetails.comment.length}}条评论
+
+			</span>
+        </div>
+        <div class="recommend-box2" v-cloak v-else>
+			<span>
+				暂无评论
+			</span>
+        </div>
+        <div class="recommend-box2" v-cloak v-if="foodDetails.comment.length>0">
+			<span v-cloak class="recommend-box2-text1" v-for="(c,index) in foodDetails.comment" :key="index">
+				<div style="display: flex;flex-direction: row">
+					<div>
+						<img width="40px" height="40px" src="/images/not_login.png">
+					</div>
+					<div style="padding:5px ">
+						<span>{{c.user.name}}</span>
+						<span style="color: #a7a7a7">{{c.time}}</span>
+						<div>{{c.content}}</div>
+					</div>
+				</div>
+			</span>
+        </div>
+    </div>
+    <!--加入购物车部分-->
+    <div class="goods-details-bottom">
+        <a href="/view/index">
+            <div class="gd-collect">
+                <span class="gd-collect-img1"></span>
+                <span class="gd-collect-text1">首页</span>
+            </div>
+        </a>
+        <a href="/shopcar" class="gd-collect">
+            <!--			<span class="gd-collect-img1 img2"><i class="add-num" >{{fruitsDetail.shopCartNum}}</i></span>-->
+            <span class="gd-collect-img1 img2"><i class="add-num"></i></span>
+            <span class="gd-collect-text1">购物车</span>
+        </a>
+        <div class="gd-collect-sx"></div>
+        <button class="gd-collect-btn1 addcar" @click="addCar" id="addCar">加入购物车</button>
+        <!--<a :href="'/indent-details.html?fId='+fruitsDetail.fid" @click="localStorage.removeItem(shopCartScIdsKey)"><button class="gd-collect-btn1 btn2">立即购买</button></a>-->
+        <a :href="'/user/submit?fId='+foodDetails.food.id" >
+            <button class="gd-collect-btn1 btn2"  >立即购买</button>
+        </a>
+    </div>
+
+</div>
+<script src="/js/TouchSlide.1.1.js"></script>
+<script src="/js/jquery-1.8.3.min.js"></script>
+<script src="/js/goods-details.js"></script>
+<script type="text/javascript" src="/js/vue.min.js"></script>
+<script type="text/javascript" src="/js/axios.min.js"></script>
+<!--<script type="text/javascript" src="/js/sessionStorage.js"></script>-->
+<script>
+    let id = [[${id}]]
+    let sId = [[${sId}]]
+    new Vue({
+        el: "#app",
+        data: {
+
+            foodDetails: {
+                "food": [
+                    {
+                        "id": 0,
+                        "sid": "",
+                        "title": "",
+                        "price": 0,
+                        "priceOff": 0,
+                        "image": "",
+                        "describes": ""
+                    }
+                ],
+                "comment": [
+                    {
+                        "id": 0,
+                        "uid": 0,
+                        "sid": 0,
+                        "fid": 0,
+                        "content": "",
+                        "time": "",
+                        "user": {
+                            "id": 0,
+                            "name": 0,
+                            "phone": "",
+                            "account": ""
+                        }
+
+                    }
+                ]
+            },
+
+        },
+
+//获取商品详细信息
+        methods: {
+            init() {
+                axios.get(`/food/getFoodByid?id=` + id + '&sId=' + sId).then(response => {
+                    console.log(response.data);
+                    this.foodDetails = response.data;
+                }).catch(err => {
+                    console.log(err);
+                    alert(err.response.data.message);
+                })
+
+            },
+            //加入购物车
+            addCar() {
+                axios.get(`/user/islogin?url=/view/food_details?id=${this.foodDetails.food.id}*sId=${this.foodDetails.food.sid}`).then(response => {
+                    if (response.data) {
+                        axios.get(`/cart/addCart?fId=` + id + '&sId=' + sId).then(response => {
+                            console.log(response);
+                            alert(response.data);
+                        }).catch(err => {
+                            console.log(err);
+                            alert(err.response.data.message);
+                        })
+                    } else {
+                        location.href = "/view/tologin";
+                    }
+                }).catch(err => {
+                    console.log("err");
+                   // alert(err.response.data.message);
+                })
+            },
+
+        },
+        created() {
+            this.init();
+        }
+    })
+
+</script>
+<script>
+
+    setTimeout(function () {
+        $(function () {
+            TouchSlide({
+                slideCell: "#slideBox",
+                titCell: ".hd ul", //开启自动分页 autoPage:true ，此时设置 titCell 为导航元素包裹层
+                mainCell: ".bd ul",
+                effect: "leftLoop",
+                autoPage: true, //自动分页
+                autoPlay: true, //自动播放
+            });
+        });
+    }, 100);
+</script>
+</body>
+</html>

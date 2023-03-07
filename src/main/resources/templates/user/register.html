@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>注册</title>
+    <link rel="stylesheet" href="/css/base.css" />
+</head>
+<body>
+<div class="bg_bank">
+    <a class="re_bank" href="/view/myinfo"></a>
+    <div class="re_min_infor">
+        <div class="re_logo" >用户注册</div>
+        <div class="bg_color">
+
+            <form>
+                <div class="re_min">
+                    <span class="icon_phone"></span>
+                    <input class="input01" id="name" name="name" type="text" placeholder="用户名" required/>
+                </div>
+                <div class="re_min">
+                    <span class="icon_phone"></span>
+                    <input class="input01" id="account" name="account" type="text" placeholder="账号" required/>
+                </div>
+                <div class="re_min">
+                    <span class="icon_phone"></span>
+                    <input class="input01"  id="phone" name="phone" type="text" placeholder="手机号" required/>
+                </div>
+                <div class="re_min">
+                    <span class="icon_passwarde"></span>
+                    <input class="input01 password"  id="password" name="password" type="password" placeholder="密码" required/>
+                    <span class="the_eyes"></span>
+                </div>
+                <div class="re_min">
+                    <span class="icon_passwarde"></span>
+                    <input class="input01 password"  id="confirmPassword" name="confirmPassword" type="password" placeholder="确认密码" required/>
+                    <span class="the_eyes"></span>
+                </div>
+            </form>
+        </div>
+        <div class="re_regist">
+            <a class="btn_regist" id="register">注册</a>
+        </div>
+        <div class="re_regist02">
+            <a href="/view/tologin" style="color: white;text-decoration: none !important;">立即登录</a>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="/js/jquery-1.11.3.min.js" ></script>
+<script type="text/javascript" src="/js/index.js" ></script>
+<script type="text/javascript" src="/js/axios.min.js" ></script>
+<script>
+    $('body').on("keydown",function (e) {
+        if(e.keyCode == 13){
+            $('#register').click();
+        }
+    })
+
+    $('#register').click(function () {
+        let userInfo = $('form').serializeObject();
+        if(verify(userInfo)){
+            axios.post("/user/register",decodeURIComponent($('form').serialize(),true)).then(response=>{
+
+                if (response.data == true){
+                alert('注册成功');
+                location.href = "/view/tologin";
+                }else {
+                    alert('注册失败，请重新注册！');
+                }
+            }).catch(err=>{
+                alert(err.response.data.message)
+            })
+        }
+    });
+
+    function verify(userInfo){
+        var regAccount= /^[a-zA-Z0-9_-]{4,16}$/;   //账号验证 4到16位由 字母，数字，下划线，减号组成
+        var regPassword = /^(\w){6,20}$/;  //密码验证 6-20个字母、数字、下划线
+        var regName =  /^[\u4E00-\u9FA5]{2,20}$/;        //2-20个汉字
+        if(!regAccount.test(userInfo.account)){
+            alert('账号格式错误！格式：4到16位由 字母，数字，下划线，减号组成');
+            return false;
+        }
+        // if(!regName.test(userInfo.userName)){
+        //     alert('用户名格式错误！格式:2-20个汉字');
+        //     return false;
+        // }
+        if(!regPassword.test(userInfo.password)){
+            alert('密码格式错误！格式: 6-20个字母、数字、下划线');
+            return false;
+        }
+        if(userInfo.password != userInfo.confirmPassword){
+            alert('两次输入的密码不匹配');
+            return false;
+        }
+        return true;
+    }
+
+    //将表单中的数据转换为对象的形式
+    $.fn.serializeObject = function () {
+
+        var ct = this.serializeArray();
+        var obj = {};
+        $.each(ct, function () {
+            if (obj[this.name] !== undefined) {
+                if (!obj[this.name].push) {
+                    obj[this.name] = [obj[this.name]];
+                }
+                obj[this.name].push(this.value || "");
+            } else {
+                obj[this.name] = this.value || "";
+            }
+        });
+        return obj;
+    };
+</script>
+</body>
+</html>

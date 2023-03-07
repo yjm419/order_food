@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<meta name="viewport" id="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<meta name="format-detection" content="telephone=no" />
+		<link rel="stylesheet" href="/css/reset.css" type="text/css"/>
+		<link href="/css/my-indent.css" rel="stylesheet" type="text/css">
+		<title></title>
+		<style>
+			.goShopping{
+				margin-top: 5px;
+				display: inline-block;
+				padding: 5px 15px;
+				border-radius: 15px;
+				background-color: #db70a8;
+				color: white;
+			}
+			.not_data{
+				color: #A3A3A3;
+				margin-top: 30px;
+			}
+
+		</style>
+	</head>
+	<body>
+		<div class="zjzz-buylist-wear" id="app">
+
+			<div class="zjzz-buylist-top">
+				<a href="/view/myinfo" class="zjzz-buylist-t1"></a>
+				<span class="zjzz-buylist-t2">我的订单</span>
+				<span class="zjzz-buylist-t3">
+					<span class="zjzz-buylist-t4"></span>
+				</span>
+			</div>
+
+			<div class="zjzz-buylist-top2" v-cloak>
+<!--				<a href="./my-indent-all.html" class="zjzz-buylist-tp1">-->
+<!--					<i>全部</i>-->
+<!--				</a>-->
+				<a href="/user/checkWaitPay" class="zjzz-buylist-tp1">
+					<i>待付款</i>
+					<span class="zjzz-buylist-tp3" v-if="orderWaitComment.orderData.waitPay>0">{{orderWaitComment.orderData.waitPay}}</span>
+				</a>
+				<a href="/user/checkwaitdeliver" class="zjzz-buylist-tp1">
+					<i >待发货</i>
+					<span class="zjzz-buylist-tp3" v-if="orderWaitComment.orderData.waitDeliver>0">{{orderWaitComment.orderData.waitDeliver}}</span>
+				</a>
+				<a href="/user/checkwaittake" class="zjzz-buylist-tp1">
+					<i >待收货</i>
+					<span class="zjzz-buylist-tp3" v-if="orderWaitComment.orderData.waitTake>0">{{orderWaitComment.orderData.waitTake}}</span>
+				</a>
+				<a href="/user/checkwaitcomment" class="zjzz-buylist-tp1">
+					<i class="zjzz-buylist-tp2">待评价</i>
+					<span class="zjzz-buylist-tp3" v-if="orderWaitComment.orderData.waitComment>0">{{orderWaitComment.orderData.waitComment}}</span>
+				</a>
+			</div>
+
+			<div class="zjzz-buylist-mid" >
+				<!--评论-->
+
+				<div class="zjzz-buylist-m1" style="margin-top: 10px;" v-for="(order,index) in orderWaitComment.orders" :key="index" >
+
+					<div class="zjzz-buylist-gtime">
+						<span class="zjzz-buylist-gtime1">{{order.number}}</span>
+						<span class="zjzz-buylist-gtime2">待评价</span>
+					</div>
+
+					<div class="zjzz-buylist-ms1" id="con_pj_1" v-for="(ordertaile,k) in orderWaitComment.orderdetailes" :key="k" >
+						<div class="zjzz-buylist-goods" v-if="order.id == ordertaile.oid" >
+							<a :herf="``" >
+								<img :src="orderWaitComment.food[k].image"/>
+							</a>
+								<div class="zjzz-buylist-gdetail">
+									<a :href="``" >
+									<span class="zjzz-buylist-gtit1">{{orderWaitComment.food[k].title}}</span>
+									</a>
+									<span class="zjzz-buylist-gmoney">
+									<i class="zjzz-buylist-gm1">￥{{orderWaitComment.food[k].price}}</i>
+									<i class="zjzz-buylist-gm2">x{{ordertaile.num}}</i>
+									<i class="zjzz-buylist-btn2"  ><a href="javascript:void (0)" v-if="ordertaile.isComment==0" @click="toPj(k)" class="zjzz-buylist-btn2">评价</a></i>
+									</span>
+								</div>
+						</div>
+
+					</div>
+					<div class="zjzz-buylist-btn" >
+						<a href="javaScript:void (0)"  @click="orderDetail(index)" class="zjzz-buylist-btn1">查看订单</a>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<script type="text/javascript" src="/js/vue.min.js"></script>
+		<script type="text/javascript" src="/js/axios.min.js"></script>
+		<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
+		<script type="text/javascript" src="/js/sessionStorage.js"></script>
+		<script>
+			new Vue({
+				el: "#app",
+				data: {
+					orderWaitComment: {
+
+						"orderData": {
+							"waitPay": 0,
+							"waitDeliver": 0,
+							"waitTake": 0,
+							"waitComment": 0
+						}
+						,
+
+						"food": [
+							{
+								"id": 0,
+								"sid": "",
+								"title": "",
+								"price": 0,
+								"priceOff": 0,
+								"image": "",
+								"describes":"",
+								"num":0
+							}
+						],
+						"orders":[
+							{
+								"id":0,
+								"uid":0,
+								"addrid":0,
+								"time":"",
+								"tmoney":0,
+								"number":"",
+								"isPay":1,
+								"status":0,
+
+							}
+						],
+						"orderdetailes":[
+							{
+								"id":0,
+								"oid":0,
+								"sid":0,
+								"fid":0,
+								"num":0,
+								"isComment":0
+							}
+						],
+
+					},
+					"totalMoney":0,
+					"message":""
+				},
+				methods: {
+					//获取订单
+					init() {
+						axios.get(`/orders/orderwaitcomment`).then(response => {
+							console.log(response);
+							this.orderWaitComment = response.data
+
+						}).catch(err => {
+							console.log(err);
+							this.message = err.response.data.message;
+						})
+					},
+					orderDetail(k){
+						let oid = this.orderWaitComment.orders[k].id;
+						let orderdetail = "";
+						let flag = true;
+						for (let orderdetailesKey in this.orderWaitComment.orderdetailes) {
+
+							if (oid == this.orderWaitComment.orderdetailes[orderdetailesKey].oid && flag){
+								orderdetail = this.orderWaitComment.orderdetailes[orderdetailesKey]
+								flag=false;
+							}
+						}
+						localStorage.setItem(orderdetailKey,JSON.stringify(orderdetail));
+
+						location.href="/user/orderdetails"
+
+
+					},
+					toPj(index){
+
+						let food = this.orderWaitComment.food[index]
+						let odid = this.orderWaitComment.orderdetailes[index].id
+
+						sessionStorage.setItem(reviewKey,JSON.stringify(food));
+						localStorage.setItem(odidKey,JSON.stringify(odid));
+
+						 location.href="/user/comment";
+					}
+				},
+				created() {
+					this.init();
+				}
+			});
+		</script>
+	</body>
+</html>

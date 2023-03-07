@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" id="viewport"
+          content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no"/>
+    <link href="/css/index.css" rel="stylesheet" type="text/css">
+    <link href="/css/reset.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<div class="near-box" id="app">
+    <div class="index-bigbox">
+        <div class="gdetails-header">
+            <a href="javascript:history.go(-1)" class="gdetails-hleft"></a>
+        </div>
+        <!--轮播开始-->
+        <div id="slideBox" class="slideBox">
+            <div class="bd" id="bd">
+                <ul>
+                    <li v-cloak v-for="(f,index) in foods.storeimg" :key="index">
+                        <a class="pic" href="#"> <img :src="f.image"></a>
+                    </li>
+                </ul>
+            </div>
+            <div class="hd">
+                <ul></ul>
+            </div>
+        </div>
+        <!--搜索开始-->
+        				<div class="brand-box1">
+                            <button>位置</button>
+        					<input type="search" id="search"  v-model="search"  name="search" placeholder="搜索" style="text-align: center" >
+        					<span id="search_img" v-on:click="searchFood"  class="index-top-img1"><img src="/images/search3.png" alt=""></span>
+        				</div>
+<!--        v-on:click="searchFruits"-->
+        <!--搜索结束-->
+        <!--菜单信息开始-->
+        <div class="special-sale-box3">
+            <!--					v-cloak-->
+            <div class="special-sale-box4" v-for="(f,index) in foods.food" :key="index">
+
+                <a  :href="'/view/food_details?id='+f.id+'&sId='+f.sid ">
+                    <span class="special-sale-img1"> <img :src="f.image" alt=""></span>
+                    <span class="special-sale-text2">{{f.title}}</span>
+                    <span class="special-sale-text2">{{f.price}}<i>{{f.priceOff}}</i></span>
+
+                </a>
+            </div>
+        </div>
+        <!--水果信息结束-->
+    </div>
+    <!--bigbox结束-->
+    <div class="kaola-bottom">
+        <a href="/view/index" class="kaola-bottom-box1">
+            <span class="kaola-bottom-img1"><img src="/images/home.png"></span>
+            <span class="kaola-bottom-text1 text2">首 页</span>
+        </a>
+        <a href="/shopcar" class="kaola-bottom-box1">
+            <span class="kaola-bottom-img1"><img src="/images/shop-cart1.png"></span>
+            <span class="kaola-bottom-text1">购物车</span>
+        </a>
+        <a href="/view/myinfo" class="kaola-bottom-box1">
+            <span class="kaola-bottom-img1"><img src="/images/people1.png"></span>
+            <span class="kaola-bottom-text1">我的</span>
+        </a>
+    </div>
+</div>
+<script type="text/javascript" src="/js/vue.min.js"></script>
+<script type="text/javascript" src="/js/axios.min.js"></script>
+<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="/js/TouchSlide.1.1.js"></script>
+<script type="text/javascript" src="/js/scrolltopcontrol.js"></script>
+<script th:inline="javascript">
+    let sId = [[${sId}]]
+    new Vue({
+        el: "#app",
+        data: {
+            foods: {
+                "food": [
+                    {
+                        "id": 0,
+                        "sid": "",
+                        "title": "",
+                        "price": 0,
+                        "priceOff": 0,
+                        "image": "",
+                        "describes":""
+                    }
+                ],
+                "storeimg":[
+                    {
+                        "id":0,
+                        "sid":0,
+                        "image":""
+                    }
+                ]
+            },
+            "search":"123456"
+        },
+        methods: {
+
+            init() {
+                axios.get(`/food/getFoodInStore?sId=`+sId).then(response => {
+                    this.foods = response.data;
+                    console.log(response.data)
+                }).catch(err => {
+                    console.log(err);
+                })
+            },
+            searchFood(){
+                axios.get(`/food/getFoodByTitle?title=${this.search}&sId=`+sId).then(response =>{
+                    this.foods= response.data;
+                }).catch(err =>{
+                    console.log(err)
+                })
+            }
+        },
+        created() {
+            this.init();
+        }
+    });
+
+</script>
+<script>
+
+    setTimeout(function () {
+        $(function () {
+            TouchSlide({
+                slideCell: "#slideBox",
+                titCell: ".hd ul", //开启自动分页 autoPage:true ，此时设置 titCell 为导航元素包裹层
+                mainCell: ".bd ul",
+                effect: "leftLoop",
+                autoPage: true, //自动分页
+                autoPlay: true, //自动播放
+            });
+        });
+    }, 100);
+</script>
+</body>
+</html>

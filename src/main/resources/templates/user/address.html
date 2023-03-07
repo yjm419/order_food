@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" id="viewport"
+          content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no"/>
+    <link href="/css/reset.css" rel="stylesheet" type="text/css">
+    <link href="/css/receiving-adress.css" rel="stylesheet" type="text/css">
+    <style>
+        .qrdd-a1-t2 {
+            float: left;
+            font-size: 12px;
+            padding: 2px 4px 1px 4px;
+            background-color: #FF9201;
+            color: #FFFFFF;
+            margin-top: -2px;
+        }
+    </style>
+</head>
+<body>
+<div class="near-box" id="app">
+    <div class="header">
+        <a href="javaScript:history.go(-1)" class="left"></a>
+        收货地址
+    </div>
+
+    <div class="bigbox">
+        <div class="sh-adress-box1">
+            <div class="sh-adress-box1" v-for="(addr,index) in userAddress.address" :key="index">
+                <a class="sh-adress-box2" @click="chooseAddress(index)">
+                    <span class="sh-adress-text1">{{addr.name}}</span>
+                    <span class="sh-adress-text1 text-r">{{addr.phone}}</span>
+                    <span class="sh-adress-text2">{{addr.addr}}{{addr.addDetails}}</span>
+                    <span v-if="addr.isdefault" class="qrdd-a1-t2">默认</span>
+                </a>
+            </div>
+            <a v-if="fId!=0" :href='addUrl+"?fId="+fId'  class="set-text1">添加新地址</a>
+            <a v-else :href='addUrl'  class="set-text1">添加新地址</a>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="/js/vue.min.js"></script>
+    <script type="text/javascript" src="/js/axios.min.js"></script>
+    <script type="text/javascript" src="/js/sessionStorage.js"></script>
+    <script>
+        let fId = [[${fId}]]
+        new Vue({
+            el: "#app",
+            data: {
+                userAddress: {
+                    "address": [
+                        {
+                            "id": 0,
+                            "uid": 0,
+                            "name": "",
+                            "phone": "",
+                            "addr": "",
+                            "addDetails":"",
+                            "isDefault": 0
+                        }
+                    ],
+                },
+                "fId":0,
+                "addUrl": "/user/addAddress",
+            },
+            methods: {
+                //获取用户收货地址
+                init() {
+
+                    axios.get(`/address/getaddr`).then(response => {
+                        console.log(response);
+                        this.userAddress = response.data;
+                        if (typeof fId != 'object'){
+                        this.fId = fId;
+                        console.log(this.fId)
+                        }else {
+                            this.addUrl = "/user/addAddressCar"
+                        }
+                    }).catch(err => {
+                        console.log(err);
+                        alert(err.response.data.message);
+                    })
+                },
+                chooseAddress(index) {
+                    //将选择的收货地址id存入session
+                    localStorage.setItem(chooseAddressKey, JSON.stringify(this.userAddress.address[index]));
+                    console.log(fId);
+                    if (typeof fId != 'object'){
+                        location.href = `/user/chooseaddre?fId=`+fId;
+                    }else {
+                        location.href = `/user/chooseaddres`;
+                    }
+                }
+            },
+            created() {
+                this.init();
+            }
+        })
+    </script>
+    <script type="text/javascript">
+        var that;
+        $(".sh-adress-text3").click(function () {
+            $(this).toggleClass("img2");
+            $(this).parent(".sh-adress-box3").parent(".sh-adress-box1").siblings(".sh-adress-box1")
+                .find(".sh-adress-text3").removeClass("img2");
+        });
+        $(".sh-adress-text4").click(function () {
+            $(".delete-layer-bg").show();
+            $(".delete-layer").show();
+            $("body").addClass("ovflowhide");
+            that = $(this);
+        });
+        $(".delete-layer-bg").click(function () {
+            $(".delete-layer-bg").hide();
+            $(".delete-layer").hide();
+            $("body").removeClass("ovflowhide");
+        });
+        $(".other1").click(function () {
+            $(".delete-layer-bg").hide();
+            $(".delete-layer").hide();
+            $("body").removeClass("ovflowhide");
+        });
+        $("#deletebox").click(function () {
+            $(".delete-layer-bg").hide();
+            $(".delete-layer").hide();
+            $("body").removeClass("ovflowhide");
+            $(that).parent(".sh-adress-box3").parent(".sh-adress-box1").remove();
+        });
+    </script>
+</body>
+</html>

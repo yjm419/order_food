@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" id="viewport"
+          content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no"/>
+    <link rel="stylesheet" href="/css/ydui.css" type="text/css"/>
+    <link rel="stylesheet" href="/css/demo.css" type="text/css"/>
+    <link href="/css/reset.css" rel="stylesheet" type="text/css">
+    <link href="/css/receiving-adress.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div class="near-box" id="app">
+    <div class="header">
+        <a href="javaScript:window.history.go(-1)" class="left"></a>
+        {{title}}
+    </div>
+    <div class="bigbox">
+        <div class="receiv-text1">地址信息</div>
+        <div class="receiv-box1"><input type="text" name="" class="receiv-input1" autofocus="autofocus"
+                                        v-model="userAddress.address.name" placeholder="收货人姓名（请使用真实姓名）"></div>
+        <div class="receiv-box1"><input type="number" name="" class="receiv-input1" v-model="userAddress.address.phone"
+                                        placeholder="手机号码"></div>
+        <div class="delivery-layer-box">
+            <div class="cell-item">
+                <div class="cell-right cell-arrow">
+                    <input type="text" class="cell-input" :value="userAddress.address.addr" readonly id="J_Address"
+                           placeholder="请选择收货地址">
+                </div>
+            </div>
+        </div>
+        <div class="receiv-box2">
+            <textarea class="receiv-input2" id="addDetails" :value="userAddress.address.addDetails" placeholder="详细地址"></textarea>
+        </div>
+        <button class="set-text1" @click="update" >修改</button>
+
+    </div>
+
+</div>
+<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="/js/vue.min.js"></script>
+<script type="text/javascript" src="/js/axios.min.js"></script>
+<script type="text/javascript" src="/js/sessionStorage.js"></script>
+<script type="text/javascript" src="/js/ydui.citys.js"></script>
+<script type="text/javascript" src="/js/ydui.js"></script>
+<script src="/js/ydui.flexible.js"></script>
+<script>
+    new Vue({
+        el: "#app",
+        data: {
+            userAddress: {
+                "address":
+                    {
+                        "id": 0,
+                        "uid": 0,
+                        "name": "",
+                        "phone": "",
+                        "addr": "",
+                        "addDetails":"",
+                        "isDefault": 0
+                    },
+            },
+            title: "修改收货地址",
+            "isDetail": "",
+            "fId":0,
+        },
+        methods: {
+            init(){
+
+                let address = localStorage.getItem(editOrderKey);
+                this.userAddress.address = JSON.parse(address);
+                console.log(address)
+
+            },
+            //修改
+            update() {
+                let addr = $('#J_Address').val();
+                let addDetails = $('#addDetails').val();
+                let address = this.userAddress.address;
+
+                address.addr = addr;
+                address.addDetails = addDetails;
+                if (address.name == "") {
+                    alert('请输入姓名');
+                    return;
+                }
+                let re = /^1\d{10}$/
+                if (!re.test(address.phone)) {
+                    alert('请输入正确的手机号');
+                    return;
+                }
+                if (addr == "") {
+                    alert('请选择收货地址')
+                    return;
+                }
+                if (address.addDetails == "") {
+                    alert('请输入详细地址');
+                    return;
+                }
+                axios({
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    method: 'post',
+                    url: `/address/update`,
+                    data: address
+                }).then(response => {
+                    if (response.data){
+                        alert("修改成功");
+                        localStorage.removeItem(editOrderKey);
+                        location.href = "/user/infoAddress"
+                    }else {
+                        alert("修改失败");
+                    }
+                }).catch(err => {
+                    console.log(err.response.data.message);
+                    alert(err.response.data.message);
+                })
+            }
+        },
+        created(){
+            this.init();
+        },
+        destroyed() {
+            alert('1');
+        },
+        mounted() {
+            var $target = $('#J_Address');
+
+            $target.citySelect();
+
+            $target.on('click', function (event) {
+                event.stopPropagation();
+                $target.citySelect('open');
+            });
+
+            $target.on('done.ydui.cityselect', function (ret) {
+                $(this).val(ret.provance + ' ' + ret.city + ' ' + ret.area);
+            });
+        }
+    })
+</script>
+</body>
+</html>

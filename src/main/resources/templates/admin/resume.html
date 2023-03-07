@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>信息</title>
+    <link rel="stylesheet" href="/admin/css/xadmin.css">
+    <link rel="stylesheet" href="/admin/layui/css/layui.css"  media="all">
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body >
+
+<div id="app">
+
+    <div class="layui-row">
+        <a href="/admin/userinfo" >返回</a>
+        <div class="layui-col-xs6" >
+            <div class="grid-demo grid-demo-bg1" >
+               <h1>账号信息</h1>
+            </div>
+            编号：<input type="text"  v-model="userInfo.user.id"><br>
+            名称：<input type="text"  v-model="userInfo.user.name"><br>
+            密码：<input type="password"  v-model="userInfo.user.password"><br>
+            电话：<input type="text"  v-model="userInfo.user.phone"><br>
+            账号：<input type="text"  v-model="userInfo.user.account"><br>
+            状态：<input type="text"  v-model="userInfo.user.limits"><br>
+            <button type="button" class="layui-btn layui-btn-normal">修改</button>
+
+            <div style="background-color: #00F7DE">
+                <h1>最近消费信息</h1>
+                <span>123</span><br>
+                <span>123</span><br>
+                <span>123</span><br>
+                <span>123</span><br>
+                <span>123</span>
+            </div>
+
+            <div style="background-color: #46f700">
+                <h1>地址情况</h1>
+
+                <div class="layui-card-body ">
+                    <table class="layui-table layui-form">
+                        <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>电话</th>
+                            <th>收货地址</th>
+                            <th>默认地址</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="(a,index) in userInfo.address" :key="index">
+                            <td>{{a.name}}</td>
+                            <td>{{a.phone}}</td>
+                            <td>{{a.addr}}&nbsp;{{a.addDetails}}</td>
+
+                            <td v-if="a.isDefault == 0" style="color: #ef0014">否</td>
+                            <td v-if="a.isDefault == 1" style="color: rgba(236,130,13,0.92)">是</td>
+
+                            <td class="td-status">
+                                <button type="button" class="layui-btn">
+                                    <a title="查看" @click="xadmin.open('查看','/aview/address?aid='+a.id)" href="javascript:;">查看</a>
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="layui-col-xs6">
+            <div class="grid-demo">
+                <h1>订单信息</h1>
+            </div>
+
+            <div class="layui-card-body ">
+                <table class="layui-table layui-form">
+                    <thead>
+                    <tr>
+                        <th>订单编号</th>
+                        <th>创建时间</th>
+
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="(o,index) in userInfo.orders" :key="index">
+                        <td>{{o.number}}</td>
+                        <td>{{o.time}}</td>
+
+                        <td v-if="o.status == 0" style="color: #ef0014">待发货</td>
+                        <td v-if="o.status == 1" style="color: #0044ef">待收货</td>
+                        <td v-if="o.status == 2" style="color: #ef8f00">已完成</td>
+                        <td class="td-status" v-if="o.status == 0">
+                            <button type="button" class="layui-btn">
+                                <a title="查看" @click="xadmin.open('查看','/aview/waitDeliver')" href="javascript:;">查看</a>
+                            </button>
+                        </td>
+                        <td class="td-status" v-if="o.status == 1">
+                            <button type="button" class="layui-btn">
+                                <a title="查看" @click="xadmin.open('查看','/aview/waitTake')" href="javascript:;">查看</a>
+                            </button>
+                        </td>
+                        <td class="td-status" v-if="o.status == 2">
+                            <button type="button" class="layui-btn">
+                                <a title="查看" @click="xadmin.open('查看','/aview/waitComment')" href="javascript:;">查看</a>
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="/admin/layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="/admin/js/xadmin.js" charset="utf-8"></script>
+<script type="text/javascript" src="/admin/js/jquery.min.js" ></script>
+<script type="text/javascript" src="/admin/js/vue.min.js"></script>
+<script type="text/javascript" src="/admin/js/axios.min.js"></script>
+<script>
+    let id = [[${id}]]
+    new Vue({
+        el:"#app",
+        data: {
+            userInfo:{
+                "user":{
+                    "id":0,
+                    "name":"",
+                    "password":"",
+                    "phone":"",
+                    "account":"",
+                    "limits":0
+                },
+                "address": [
+                    {
+                        "id": 0,
+                        "uid": 0,
+                        "name": "",
+                        "phone": "",
+                        "addr": "",
+                        "addDetails":"",
+                        "isDefault": 0
+                    }
+                ],
+
+                "orders":[
+                    {
+                        "id":0,
+                        "uid":0,
+                        "addrId":0,
+                        "time":"",
+                        "tmoney":0,
+                        "number":"",
+                        "isPay":0,
+                        "status":0,
+
+                    }
+                ],
+            }
+        },
+        methods:{
+            init(){
+                axios.get(`/admin/getUserInfoById?id=`+id).then(response =>{
+                    console.log(response)
+                    this.userInfo = response.data;
+                }).catch(err => {
+                    console.log(err);
+                    console.log(err.response.data);
+                })
+            },
+        },
+        created(){
+            this.init();
+        },
+    });
+</script>
+
+</html>

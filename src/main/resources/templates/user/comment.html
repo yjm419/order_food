@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+<meta name="viewport" id="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="format-detection" content="telephone=no"/>
+<link href="/css/pj.css" rel="stylesheet" type="text/css">
+<link href="/css/reset.css" rel="stylesheet" type="text/css">
+<script src="/js/jquery-1.8.3.min.js"></script>
+<script src="/js/jquery.raty.js" type="text/javascript"></script>
+</head>
+<body>
+<div class="near-box" id="app">
+    <div class="header">
+		<a href="javascript:history.go(-1)" class="left"></a>
+		发表评价
+	</div>
+    <div class="jd-qrdd-bigbox" v-cloak >
+        <a :href="`/goods-details.html?fId=${food.id}`">
+           <div class="tb-pj-a1">
+              <span class="tbpj-a1-i1"><img :src="food.image"></span>
+              <span class="tbpj-a1-t1">{{food.title}}</span>
+           </div>
+        </a>
+       <div class="tb-pj-a2" style="border: 1px solid">
+       	  <textarea class="tbpj-a2-input" placeholder="评级内容" v-model="comment.content"></textarea>
+       </div>
+<!--       <div class="tb-pj-a1" >-->
+<!--       	  <span class="tbpj-a1-i2 check" id="anonymous"></span>-->
+<!--       	  <span class="tbpj-a1-t2">匿名评价</span>-->
+<!--       </div>-->
+       <a href="javascript:void (0)" class="tb-pj-c1" @click="review">发表评价</a>
+    </div>
+</div>
+<script type="text/javascript" src="/js/vue.min.js"></script>
+<script type="text/javascript" src="/js/axios.min.js"></script>
+<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="/js/sessionStorage.js"></script>
+<script type="text/javascript">
+    new Vue({
+        el: "#app",
+        data: {
+            "food": {
+                    "id": 0,
+                    "sid": "",
+                    "title": "",
+                    "price": 0,
+                    "priceOff": 0,
+                    "image": "",
+                    "describes":"",
+                    "num":0
+                },
+            "comment":{
+                "id":0,
+                "uid":0,
+                "sid":0,
+                "fid":0,
+                "content":"",
+                "time":""
+            }
+        },
+        methods: {
+            init() {
+                //获取session中的信息
+                let food = sessionStorage.getItem(reviewKey);
+                this.food = JSON.parse(food)
+
+            },
+
+            //发表评论
+            review(){
+                if(this.comment.content==""){
+                    alert('请输入评论内容');
+                    return;
+                }
+                let odid = localStorage.getItem(odidKey);
+
+                console.log(odid)
+                axios.post(`/comm/comment?content=${this.comment.content}&odid=${odid}`).then(response => {
+                    if (response.data){
+                        alert("评论成功!")
+                        location.href="/user/checkwaitcomment"
+                    }else {
+                        alert("出错了!")
+                    }
+                }).catch(err => {
+                    console.log(err);
+                    let message = err.response.data.message;
+                })
+            }
+        },
+        created() {
+            this.init();
+        }
+    });
+
+</script>
+</body>
+
+</html>
